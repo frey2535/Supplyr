@@ -29,4 +29,11 @@ Service-role credentials are server-only. Browser and route-handler access uses 
 
 GitHub Actions validates every pull request and deploys `main` through OpenNext to Cloudflare Workers. The Worker is configured with the custom domain `supplyr.currentflowconsulting.org`, so a production deployment opens at **https://supplyr.currentflowconsulting.org** rather than a `workers.dev` URL. The `currentflowconsulting.org` zone must be active in the same Cloudflare account used by the deployment token; Wrangler creates and manages the required DNS record for the custom domain.
 
-Configure the repository secrets named in `.github/workflows/ci.yml`, give `CLOUDFLARE_API_TOKEN` permission to edit Workers and DNS/custom domains for the `currentflowconsulting.org` zone, and set `NEXT_PUBLIC_APP_URL=https://supplyr.currentflowconsulting.org` in the production environment. Apply Supabase migrations separately as an explicit release step. A committed npm lock file is used by GitHub Actions for dependency caching and `npm ci`.
+Configure the repository secrets named in `.github/workflows/ci.yml` and give `CLOUDFLARE_API_TOKEN` permission to edit Workers and DNS/custom domains for the `currentflowconsulting.org` zone. The workflow owns the canonical application URL, so it does not need to be duplicated in `.env.example` or configured as a separate secret. Apply Supabase migrations separately as an explicit release step. The committed bootstrap lock file provides the GitHub Actions cache key; CI uses `npm install` until the complete transitive lockfile can be generated from an unrestricted npm registry connection.
+
+### Put Supplyr online
+
+1. Create the Supabase project, apply `supabase/migrations/20260929000000_initial.sql`, and add the project's URL and anonymous key as the `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` GitHub Actions secrets.
+2. Add `CLOUDFLARE_ACCOUNT_ID` and a `CLOUDFLARE_API_TOKEN` with Workers and custom-domain permissions to GitHub Actions secrets. The Cloudflare account must own the `currentflowconsulting.org` zone.
+3. Merge to `main`. The deployment job now builds the OpenNext worker before publishing it, then exposes the deployment at **https://supplyr.currentflowconsulting.org**.
+4. To redeploy at any time, open **Actions → CI → Run workflow** on `main`. The production environment in GitHub links directly to the live application.
