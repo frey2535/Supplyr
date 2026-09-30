@@ -17,9 +17,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      # The bootstrap lockfile only records direct dependencies. npm install
-      # resolves and caches the complete transitive graph on the runner.
+        with: { node-version: 20 }
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Type-check
