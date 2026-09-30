@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "supplyr",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    {
+      "pattern": "supplyr.currentflowconsulting.org",
+      "custom_domain": true
+    }
+  ],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" }
+}
