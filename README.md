@@ -27,4 +27,6 @@ Service-role credentials are server-only. Browser and route-handler access uses 
 
 ## Deployment
 
-GitHub Actions validates every pull request and deploys `main` through OpenNext to Cloudflare Workers. Configure the repository secrets named in `.github/workflows/ci.yml`, then connect a custom domain in Cloudflare. Apply Supabase migrations separately as an explicit release step.
+GitHub Actions validates every pull request and deploys `main` through OpenNext to Cloudflare Workers. The Worker is configured with the custom domain `supplyr.currentflowconsulting.org`, so a production deployment opens at **https://supplyr.currentflowconsulting.org** rather than a `workers.dev` URL. The `currentflowconsulting.org` zone must be active in the same Cloudflare account used by the deployment token; Wrangler creates and manages the required DNS record for the custom domain.
+
+Configure the repository secrets named in `.github/workflows/ci.yml`, give `CLOUDFLARE_API_TOKEN` permission to edit Workers and DNS/custom domains for the `currentflowconsulting.org` zone, and set `NEXT_PUBLIC_APP_URL=https://supplyr.currentflowconsulting.org` in the production environment. Apply Supabase migrations separately as an explicit release step. A committed npm lock file is used by GitHub Actions for dependency caching and `npm ci`.
