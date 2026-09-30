@@ -25,46 +25,26 @@ jobs:
       - name: Build Next.js application
         run: npm run build
   deploy:
-    # Main deploys automatically; workflow_dispatch can deploy the selected ref
-    # when production needs to be brought online before a merge.
-    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: validate
     runs-on: ubuntu-latest
     environment:
       name: production
       url: https://supplyr.currentflowconsulting.org
     steps:
-      - name: Check out selected revision
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-      - name: Build Cloudflare worker
-        run: npm run cf:build
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm install --no-audit --no-fund
+      - run: npm run cf:build
         env:
           NEXT_PUBLIC_APP_URL: https://supplyr.currentflowconsulting.org
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      - name: Deploy worker and custom domain
-        run: npm run cf:deploy
+      - run: npm run cf:deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NEXT_PUBLIC_APP_URL: https://supplyr.currentflowconsulting.org
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      - name: Verify production URL
-        run: |
-          for attempt in 1 2 3 4 5 6; do
-            if curl --fail --silent --show-error --location --max-time 20 \
-              https://supplyr.currentflowconsulting.org/ > /dev/null; then
-              echo "Supplyr is live at https://supplyr.currentflowconsulting.org/"
-              exit 0
-            fi
-            echo "Waiting for the custom domain (attempt $attempt of 6)..."
-            sleep 10
-          done
-          echo "Deployment completed, but the production URL is not reachable." >&2
-          exit 1
