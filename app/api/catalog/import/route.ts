@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   const items = rows.flatMap(({ result }) => result.success
     ? [{ ...result.data, company_id: companyId, internal_sku: result.data.internal_sku || null }]
     : []);
-  const { data, error } = await supabase.from('catalog_items').upsert(items, { onConflict: 'company_id,internal_sku' }).select('id');
+  const { data, error } = await supabase.from('supplyr_catalog_items').upsert(items, { onConflict: 'company_id,internal_sku' }).select('id');
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === '42501' ? 403 : 400 });
   return NextResponse.json({ imported: data.length });
 }
