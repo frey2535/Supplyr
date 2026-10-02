@@ -9,7 +9,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { data, error } = await supabase.rpc('approve_material_request', { p_request_id: params.id, p_note: parsed.data.note ?? null });
+  const { data, error } = await supabase.rpc('supplyr_approve_material_request', { p_request_id: params.id, p_note: parsed.data.note ?? null });
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === '42501' ? 403 : 400 });
   return NextResponse.json({ request: data });
 }
