@@ -6,11 +6,11 @@ Supplyr is a standalone, multi-tenant material-request and procurement applicati
 
 `Request → approval → company rules → supplier split → purchasing review → PO → receiving → integrations`
 
-The database is the security boundary. Every business row carries a `company_id`; composite foreign keys prevent cross-company references, and Supabase row-level security resolves membership from `auth.uid()`. Never accept a trusted tenant id from the browser.
+Supplyr currently shares Stockr's Supabase project to stay within the free-tier project limit. Supplyr database objects are prefixed `supplyr_*`; existing `stockr_*` objects are left untouched. The database is the security boundary. Every business row carries a `company_id`; composite foreign keys prevent cross-company references, and Supabase row-level security resolves membership from `auth.uid()`. Never accept a trusted tenant id from the browser.
 
 ## Local development
 
-1. Copy `.env.example` to `.env.local` and add a Supabase URL and anonymous key.
+1. Copy `.env.example` to `.env.local` and add a Supabase URL and publishable key.
 2. Run the SQL migration with `supabase db push` (or paste it into a new Supabase project's SQL editor).
 3. Install and start: `npm install && npm run dev`.
 
@@ -33,7 +33,7 @@ Configure the repository secrets named in `.github/workflows/ci.yml` and give `C
 
 ### Put Supplyr online
 
-1. Create the Supabase project, apply `supabase/migrations/20260929000000_initial.sql`, and add the project's URL and anonymous key as the `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` GitHub Actions secrets.
+1. Use the existing Stockr Supabase project and apply `supabase/migrations/20260929000000_initial.sql`, and add the project's URL and publishable key as the `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` GitHub Actions secrets.
 2. Add `CLOUDFLARE_ACCOUNT_ID` and a `CLOUDFLARE_API_TOKEN` with Workers and custom-domain permissions to GitHub Actions secrets. The Cloudflare account must own the `currentflowconsulting.org` zone.
 3. Merge to `main`. The deployment job now builds the OpenNext worker before publishing it, then exposes the deployment at **https://supplyr.currentflowconsulting.org**.
 4. To redeploy at any time, open **Actions → CI → Run workflow** on `main`. The production environment in GitHub links directly to the live application.
